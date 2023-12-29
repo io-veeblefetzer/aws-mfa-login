@@ -12,24 +12,18 @@ you name your MFA method in AWS, 'yubi' should be in the name in order to work..
 
 ## Installation instructions
 
-[ ] Clone this repository
-[ ] Install the `*sh` scripts on your path
-[ ] Update your `.profile` or alike with the following snippet:
+Make sure that the prerequisites are installed and configured. Then open a terminal and run the following command:
 
 ```
-# Added for AWS environment
-export AWS_TEMP_ENV="~/.aws/temp_env"
-AWS_ENV=$(eval echo $AWS_TEMP_ENV)
-if [ -e "$AWS_ENV" ]; then
-    source "$AWS_ENV"
-fi
+curl -sSL "https://raw.githubusercontent.com/io-veeblefetzer/aws-mfa-login/main/install.sh" | bash -s
 ```
 
 ## How to run it
+### Login
 Just run the following command. If you have a Yubikey, plug it in.
 
 ```
-./aws-mfa-login.sh <profile name>
+aws-mfa-login <profile name>
 ```
 
 This will list your MFA options. Pick the right one and provide the MFA code. If
@@ -39,6 +33,13 @@ Your environment is now set. Test your access by running, for example:
 
 ```
 aws s3 ls
+```
+
+### Logout
+Run the following command: 
+
+```
+aws-logout
 ```
 
 
