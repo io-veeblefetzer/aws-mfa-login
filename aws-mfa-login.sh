@@ -15,6 +15,19 @@ AWS_OUTPUT=$(aws iam list-mfa-devices --profile $AWS_PROFILE | jq -r ".MFADevice
 # Split the output into an array
 IFS=$'\n' read -d '' -r -a MFA_DEVICES <<< "$AWS_OUTPUT"
 
+# Detect the current shell
+CURRENT_SHELL=$(ps -p $$ -ocomm=)
+
+# Function to check MFA device
+check_mfa_device() {
+    echo "$MFA_DEVICE" | grep -i 'yubi' > /dev/null
+    if [ $? -eq 0 ]; then
+        TOKEN_CODE=$(ykman oath accounts code yubikey | awk '{print $NF}' | tr -d '[:space:]')
+    else
+        echo "👉 Enter your token code and press enter:"
+        read TOKEN_CODE
+    fi
+}
 
 PS3="👉 Select an option: "
 select choice in "${MFA_DEVICES[@]}"; do
@@ -23,11 +36,14 @@ select choice in "${MFA_DEVICES[@]}"; do
 
     TOKEN_CODE=''
 
-    if [[ $MFA_DEVICE == *([Yy]ubi)* ]]; then
-        TOKEN_CODE=$(ykman oath accounts code yubikey | awk '{print $NF}' | tr -d '[:space:]')
+    # Determine which shell is running and call the appropriate function
+    if [[ "$CURRENT_SHELL" == *"bash"* ]]; then
+        check_mfa_device
+    elif [[ "$CURRENT_SHELL" == *"zsh"* ]]; then
+        check_mfa_device
     else
-        echo "👉 Enter your token code and press enter:"
-        read TOKEN_CODE
+        echo "Unsupported shell: $CURRENT_SHELL"
+        exit 1
     fi
 
     echo "🔃 Fetching STS session token"

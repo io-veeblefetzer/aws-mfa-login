@@ -14,15 +14,39 @@ you name your MFA method in AWS, 'yubi' should be in the name in order to work..
 
 Make sure that the prerequisites are installed and configured. Then open a terminal and run the following command:
 
-```
+```shell
 curl -sSL "https://raw.githubusercontent.com/io-veeblefetzer/aws-mfa-login/main/install.sh" | bash -s
+```
+### Fish users
+Go to `~/.config/fish/config.fish` and add the following line:
+
+```shell
+# aws-mfa-login
+set --export AWS_TEMP_ENV "$HOME/.aws/temp_env"
+
+# Read thr file and parse the AWS_ tokens into the environment
+function source_env
+    if test -f $AWS_TEMP_ENV
+        set -lx bash_env (bash -c "source $AWS_TEMP_ENV; env")
+
+        # Parse the output and set environment variables in Fish
+        for line in $bash_env
+            set key_value (string split "=" $line)
+            if string match -q 'AWS_*' $key_value[1]
+                set -Ux $key_value[1] $key_value[2]
+            end
+        end
+    end
+end
+
+source_env 
 ```
 
 ## How to run it
 ### Login
 Just run the following command. If you have a Yubikey, plug it in.
 
-```
+```shell
 aws-mfa-login <profile name>
 ```
 
@@ -31,14 +55,14 @@ you use your yubikey, please touch it.
 
 Your environment is now set. Test your access by running, for example:
 
-```
+```shell
 aws s3 ls
 ```
 
 ### Logout
 Run the following command: 
 
-```
+```shell
 aws-logout
 ```
 
