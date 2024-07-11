@@ -22,7 +22,7 @@ CURRENT_SHELL=$(ps -p $$ -ocomm=)
 check_mfa_device() {
     echo "$MFA_DEVICE" | grep -i 'yubi' > /dev/null
     if [ $? -eq 0 ]; then
-        TOKEN_CODE=$(ykman oath accounts code yubikey | awk '{print $NF}' | tr -d '[:space:]')
+        TOKEN_CODE=$(ykman oath accounts code $MFA_DEVICE | awk '{print $NF}' | tr -d '[:space:]')
     else
         echo "👉 Enter your token code and press enter:"
         read TOKEN_CODE
