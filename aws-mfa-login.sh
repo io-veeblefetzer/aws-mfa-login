@@ -37,14 +37,7 @@ select choice in "${MFA_DEVICES[@]}"; do
     TOKEN_CODE=''
 
     # Determine which shell is running and call the appropriate function
-    if [[ "$CURRENT_SHELL" == *"bash"* ]]; then
-        check_mfa_device
-    elif [[ "$CURRENT_SHELL" == *"zsh"* ]]; then
-        check_mfa_device
-    else
-        echo "Unsupported shell: $CURRENT_SHELL"
-        exit 1
-    fi
+    check_mfa_device
 
     echo "🔃 Fetching STS session token"
     AUTH_DATA=$(aws sts get-session-token --profile $AWS_PROFILE --serial-number $MFA_DEVICE --token-code $TOKEN_CODE 2>&1)
