@@ -20,8 +20,10 @@ CURRENT_SHELL=$(ps -p $$ -ocomm=)
 
 # Function to check MFA device
 check_mfa_device() {
+    echo ""
     echo "$MFA_DEVICE" | grep -i 'yubi' > /dev/null
     if [ $? -eq 0 ]; then
+        echo "⏳ Selected yubikey, wait for instructions"
         TOKEN_CODE=$(ykman oath accounts code $MFA_DEVICE | awk '{print $NF}' | tr -d '[:space:]')
     else
         echo "👉 Enter your token code and press enter:"
@@ -29,19 +31,18 @@ check_mfa_device() {
     fi
 }
 
+echo ""
 PS3="👉 Select an option: "
 select choice in "${MFA_DEVICES[@]}"; do
     MFA_DEVICE=${MFA_DEVICES[$REPLY-1]}
-    echo $MFA_DEVICE
 
     TOKEN_CODE=''
 
     # Determine which shell is running and call the appropriate function
     check_mfa_device
 
-    echo "🔃 Fetching STS session token"
+    echo "⏳ Fetching STS session token"
     AUTH_DATA=$(aws sts get-session-token --profile $AWS_PROFILE --serial-number $MFA_DEVICE --token-code $TOKEN_CODE 2>&1)
-
 
     # Check if there was an error
     if [ $? -ne 0 ]; then
@@ -51,12 +52,13 @@ select choice in "${MFA_DEVICES[@]}"; do
         exit 1
     fi
 
-    echo "✅ Received auth data!"
+    echo "📥 Received auth data!"
 
     # Parse the JSON and set environment variables
     AWS_ACCESS_KEY_ID=$(echo "$AUTH_DATA" | jq -r '.Credentials.AccessKeyId')
     AWS_SECRET_ACCESS_KEY=$(echo "$AUTH_DATA" | jq -r '.Credentials.SecretAccessKey')
     AWS_SESSION_TOKEN=$(echo "$AUTH_DATA" | jq -r '.Credentials.SessionToken')
+    AWS_EXPIRATION=$(echo "$AUTH_DATA" | jq -r '.Credentials.Expiration')
     AWS_DEFAULT_REGION=$(aws configure get region --profile $AWS_PROFILE)
     AWS_DEFAULT_PROFILE=$AWS_PROFILE
 
@@ -67,7 +69,7 @@ select choice in "${MFA_DEVICES[@]}"; do
 
     
     # Write the temp file
-    echo "Writing credentials to $AWS_ENV"
+    echo "💾 Writing credentials to $AWS_ENV"
 
     touch $AWS_ENV
     echo "# AWS Temp file, created $(date)" 2>/dev/null >> $AWS_ENV
@@ -78,6 +80,6 @@ select choice in "${MFA_DEVICES[@]}"; do
     echo "export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION" 2>/dev/null >> $AWS_ENV
     source $AWS_ENV
 
-    echo "✅ Logged in!"
+    echo "🔓 Logged in! Expires $AWS_EXPIRATION"
     exit 0
 done
