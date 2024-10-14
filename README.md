@@ -59,6 +59,22 @@ Your environment is now set. Test your access by running, for example:
 aws s3 ls
 ```
 
+## How to configure bastion login
+The script can automatically update inbound rules of security groups to configure your bastions or db access. Based on your
+profile you should define the following environment variable:
+
+```
+AWS_SG_BASTION_GROUPIDS_<Profile name in uppercase>=<securitygroup id>,<securitygroup id>
+```
+
+This variable must contain a comma-separated list of security groups. If defined the script will parse it and add dynamic inbound
+rules to this security group:
+
+- Port: 22
+- Protocol: tcp
+- Description: contains 'added by aws-mfa-login', followed by the hostname 
+
+
 ### Logout
 Run the following command: 
 
