@@ -26,9 +26,9 @@ set --export AWS_TEMP_ENV "$HOME/.aws/temp_env"
 
 # Read thr file and parse the AWS_ tokens into the environment
 function source_env
+    
     if test -f $AWS_TEMP_ENV
         set -lx bash_env (bash -c "source $AWS_TEMP_ENV; env")
-
         # Parse the output and set environment variables in Fish
         for line in $bash_env
             set key_value (string split "=" $line)
@@ -36,10 +36,20 @@ function source_env
                 set -Ux $key_value[1] $key_value[2]
             end
         end
+    else
+        # Parse the output and UNset environment variables in Fish
+        set -lx bash_env (bash -c "env")
+        for line in $bash_env
+            set key_value (string split "=" $line)
+            if string match -q 'AWS_*' $key_value[1]
+                set -e $key_value[1]
+            end
+        end
     end
 end
 
 source_env 
+
 ```
 
 ## How to run it
