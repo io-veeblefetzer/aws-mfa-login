@@ -15,10 +15,13 @@ INSTALL_PATH=/usr/local/bin
 echo "Installing scripts"
 curl -s "https://raw.githubusercontent.com/io-veeblefetzer/aws-mfa-login/main/aws-mfa-login.sh" > "$INSTALL_PATH/aws-mfa-login"
 curl -s "https://raw.githubusercontent.com/io-veeblefetzer/aws-mfa-login/main/aws-logout.sh" > "$INSTALL_PATH/aws-logout"
+curl -s "https://raw.githubusercontent.com/io-veeblefetzer/aws-mfa-login/main/get-rds-password.sh" > "$INSTALL_PATH/get-rds-password"
+
 
 # Make them executable
 chmod +x "$INSTALL_PATH/aws-mfa-login"
 chmod +x "$INSTALL_PATH/aws-logout"
+chmod +x "$INSTALL_PATH/get-rds-password"
 
 # Echo the profile settings
 
