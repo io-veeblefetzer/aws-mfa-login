@@ -21,9 +21,6 @@ curl -sSL "https://raw.githubusercontent.com/io-veeblefetzer/aws-mfa-login/main/
 Go to `~/.config/fish/config.fish` and add the following line:
 
 ```shell
-# aws-mfa-login
-set --export AWS_TEMP_ENV "$HOME/.aws/temp_env"
-
 # Read thr file and parse the AWS_ tokens into the environment
 function source_env
     
@@ -49,6 +46,9 @@ function source_env
 end
 
 source_env 
+
+# aws-mfa-login, put this after the source_env call
+set --export AWS_TEMP_ENV "$HOME/.aws/temp_env"
 
 ```
 
@@ -92,6 +92,27 @@ Run the following command:
 aws-logout
 ```
 
+## RDS Password Retrieval
+The `get-rds-password.sh` script helps you quickly retrieve RDS database passwords from AWS Secrets Manager:
+
+```shell
+./get-rds-password.sh
+```
+
+This script will:
+1. 🔍 Retrieve all AWS secrets starting with 'rds!'
+2. 📋 Display them as a numbered list showing DB instance names
+3. 👉 Prompt you to select a secret
+4. 🔍 Retrieve the secret value and extract the password
+5. 📋 Copy the password to your clipboard using `pbcopy`
+
+**Prerequisites:**
+- AWS CLI configured and authenticated (use `aws-mfa-login` first)
+- `jq` installed for JSON parsing
+- Secrets in AWS Secrets Manager with names starting with 'rds!'
+- Secret values should be JSON objects containing a `password` field
+
+**Note:** The script assumes secret descriptions contain database instance information in the format `db:instance-name` for display purposes.
 
 ## Compatibility
 Compatible with bash, zsh
