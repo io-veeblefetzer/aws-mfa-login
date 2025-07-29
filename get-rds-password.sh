@@ -57,5 +57,5 @@ if [ "$password" = "null" ] || [ -z "$password" ]; then
     exit 1
 fi
 
-echo "$password" | pbcopy
+echo -n "$password" | pbcopy
 echo "📋 Password copied to clipboard!"
