@@ -2,6 +2,23 @@
 
 set -e
 
+# Cross-platform clipboard function
+copy_to_clipboard() {
+    local text="$1"
+    
+    # Try pbcopy first (macOS)
+    if command -v pbcopy >/dev/null 2>&1; then
+        echo -n "$text" | pbcopy
+    # Fall back to xclip (Linux/Unix)
+    elif command -v xclip >/dev/null 2>&1; then
+        echo -n "$text" | xclip -selection clipboard
+    # If neither is available
+    else
+        echo "❌ Error: No clipboard tool found. Please install pbcopy (macOS) or xclip (Linux)" >&2
+        return 1
+    fi
+}
+
 echo "🔍 Retrieving AWS RDS secrets..."
 
 # Get all secrets starting with 'rds!'
@@ -57,5 +74,5 @@ if [ "$password" = "null" ] || [ -z "$password" ]; then
     exit 1
 fi
 
-echo -n "$password" | pbcopy
+echo -n "$password" | copy_to_clipboard "$password"
 echo "📋 Password copied to clipboard!"
